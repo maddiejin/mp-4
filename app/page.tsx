@@ -1,8 +1,8 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { getDefinition, BriefDictionaryState } from "./actions";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useActionState } from "react";
 import Link from "next/link";
 
 // show loading state on submit button
@@ -28,7 +28,7 @@ export default function DictionaryPage() {
     error: null,
   };
 
-  const [state, formAction] = useFormState(getDefinition, initialState);
+  const [state, formAction] = useActionState(getDefinition, initialState);
 
   // reset audio on new word search
   const audioRef = useRef<HTMLAudioElement>(null);
