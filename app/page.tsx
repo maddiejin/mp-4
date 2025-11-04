@@ -1,17 +1,18 @@
-"use client"; 
+"use client";
 
 import { useFormState, useFormStatus } from "react-dom";
-import { getDefinition, DictionaryState } from "./actions"; 
+import { getDefinition, DictionaryState } from "./actions";
 import { useRef, useEffect } from "react";
 
 // show loading state on submit button
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <button 
-    type="submit" 
-    disabled={pending} 
-    className="your-class-name">
+    <button
+      type="submit"
+      disabled={pending}
+      className="px-6 py-2 bg-[#2d622f] text-white font-bold rounded-md transition-colors hover:bg-opacity-80 disabled:bg-gray-400 disabled:cursor-not-allowed"
+    >
       {pending ? "Searching..." : "Get Definition"}
     </button>
   );
@@ -22,7 +23,7 @@ export default function DictionaryPage() {
     word: null,
     partOfSpeech: null,
     definition: null,
-    audioUrl: null,  
+    audioUrl: null,
     error: null,
   };
 
@@ -38,49 +39,62 @@ export default function DictionaryPage() {
   }, [state.word]);
 
   return (
-    <main className="your-class-name">
-
-      <div className="your-class-name">
-        <h1 className="your-class-name"
-        >Dictionary</h1>
+    <main className="font-serif bg-white max-w-2xl mx-auto my-12 p-8 rounded-lg shadow-lg">
+      <div className="flex flex-col gap-6">
+        <h1
+          className="font-['Playball'] text-5xl text-center text-[#2d622f] border-b-2 border-[#eee] pb-4 mb-2"
+        >
+          Dictionary
+        </h1>
 
         {/* form display */}
-        <form 
-        action={formAction}
-        className="your-class-name">
-        <label htmlFor="word" className="your-class-name">Enter a word:</label>
-        <input
-          id="word"
-          type="text"
-          name="word"
-          placeholder="Enter a word..."
-          className="your-class-name"
-          required
-        />
-        <SubmitButton />
-      </form>
+        <form
+          action={formAction}
+          className="flex flex-col sm:flex-row gap-4 w-full"
+        >
+          <label htmlFor="word" className="font-semibold text-[#444] self-center">
+            Enter a word:
+          </label>
+          <input
+            id="word"
+            type="text"
+            name="word"
+            placeholder="Enter a word..."
+            className="flex-grow px-4 py-2 border border-gray-300 rounded-md text-[#444] focus:outline-none focus:ring-2 focus:ring-[#2d622f]"
+            required
+          />
+          <SubmitButton />
+        </form>
 
-      {/* error display */}
-      {state.error && (
-        <p className="your-class-name">
-          <strong>Error:</strong> {state.error}
-        </p>
-      )}
+        {/* error display */}
+        {state.error && (
+          <p className="text-red-700 bg-red-50 p-4 rounded-md border border-red-200">
+            <strong>Error:</strong> {state.error}
+          </p>
+        )}
 
-      {/* definition display */}
-      {state.definition && !state.error && (
-          <div className="your-class-name">
-            <div className="your-class-name">
-              <h2 className="your-class-name">
+        {/* definition display */}
+        {state.definition && !state.error && (
+          <div className="bg-[#f9f9f9] p-6 rounded-lg shadow-inner flex flex-col gap-2">
+            <div className="flex items-center gap-4">
+              <h2
+                className="font-['Playball'] text-4xl text-[#2d622f]"
+              >
                 {state.word}
               </h2>
             </div>
 
-            <i className="your-class-name">
+            <i
+              className="text-lg text-[#666] -mt-2"
+            >
               ({state.partOfSpeech})
             </i>
 
-            <p className="your-class-name">{state.definition}</p>
+            <p
+              className="text-base text-[#444] leading-relaxed mt-2"
+            >
+              {state.definition}
+            </p>
 
             {state.audioUrl && (
               <audio controls className="mt-5 w-full" ref={audioRef}>
@@ -91,9 +105,6 @@ export default function DictionaryPage() {
           </div>
         )}
       </div>
-      
-      
-      
     </main>
   );
 }
