@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormState, useFormStatus } from "react-dom";
-import { getDefinition, DictionaryState } from "./actions";
+import { getDefinition, BriefDictionaryState } from "./actions";
 import { useRef, useEffect } from "react";
 import Link from "next/link";
 
@@ -20,7 +20,7 @@ function SubmitButton() {
 }
 
 export default function DictionaryPage() {
-  const initialState: DictionaryState = {
+  const initialState: BriefDictionaryState = {
     word: null,
     partOfSpeech: null,
     definition: null,
@@ -104,15 +104,12 @@ export default function DictionaryPage() {
               </audio>
             )}
 
-            <div className="mt-6 border-t border-gray-200 pt-4">
+            <div className="mt-6 border-t border-gray-200 pt-4 flex justify-center">
               <Link
-                // @ts-ignore
                 href={`/word/${state.word}`}
-                className="group relative inline-block font-serif font-bold text-brand-green no-underline"
+                className="inline-block px-6 py-2 bg-[#2d622f] text-white font-bold rounded-md transition transform hover:scale-105 hover:bg-opacity-80 focus:ring-2 focus:ring-offset-2 focus:ring-[#2d622f] no-underline text-center"
               >
                 See all definitions & details &rarr;
-                {/* Underline effect */}
-                <span className="absolute bottom-0 left-0 block h-0.5 w-full scale-x-0 bg-brand-green transition-transform duration-300 group-hover:scale-x-100"></span>
               </Link>
             </div>
           </div>

@@ -1,6 +1,6 @@
 "use server";
 
-export interface DictionaryState {
+export interface BriefDictionaryState {
   word: string | null;
   partOfSpeech: string | null;
   definition: string | null;
@@ -8,11 +8,19 @@ export interface DictionaryState {
   error: string | null;
 }
 
-// gets definition from API
+export interface FullDictionaryState extends BriefDictionaryState {
+  pronunciations: string[]; 
+  forms: string[];           
+  synonyms: string[];        
+  antonyms: string[];  
+  usageExamples: string[];      
+}
+
+
 export async function getDefinition(
-  prevState: DictionaryState,
+  prevState: BriefDictionaryState,
   formData: FormData
-): Promise<DictionaryState> {
+): Promise<BriefDictionaryState> {
   
   const word = formData.get("word") as string;
   if (!word) {
@@ -88,18 +96,41 @@ export async function getDefinition(
   }
 }
 
-export async function getWordDetails(word: string) {
+export async function getWordDetails(word: string): Promise<FullDictionaryState> {
+  if (!word) {
+    return {
+      word: "",
+      partOfSpeech: "",
+      definition: "",
+      pronunciations: [],
+      forms: [],
+      synonyms: [],
+      antonyms: [],
+      audioUrl: null,
+      usageExamples: [],
+      error: "Please provide a word to fetch details for."
+    };
+  }
+
   const apiKey = process.env.LINGUA_ROBOT_API_KEY;
   if (!apiKey) {
-    console.error("Server configuration error: API key not found.");
-    return null;
+    return {
+      word,
+      partOfSpeech: "",
+      definition: "",
+      pronunciations: [],
+      forms: [],
+      synonyms: [],
+      antonyms: [],
+      audioUrl: null,
+      usageExamples: [],
+      error: "Server configuration error: API key not found."
+    };
   }
 
   try {
     const response = await fetch(
-      `https://lingua-robot.p.rapidapi.com/language/v1/entries/en/${decodeURIComponent(
-        word
-      )}`,
+      `https://lingua-robot.p.rapidapi.com/language/v1/entries/en/${word}`,
       {
         method: "GET",
         headers: {
@@ -111,23 +142,91 @@ export async function getWordDetails(word: string) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      console.error("API Error:", errorData?.message || response.statusText);
-      return null;
+      const message = errorData?.message || `API Error: ${response.statusText}`;
+      return {
+        word,
+        partOfSpeech: "",
+        definition: "",
+        pronunciations: [],
+        forms: [],
+        synonyms: [],
+        antonyms: [],
+        audioUrl: null,
+        usageExamples: [],
+        error: message
+      };
     }
-
-    console.log(`[Action] Fetch successful for word: ${word}`);
 
     const data = await response.json();
     const entry = data.entries?.[0];
 
     if (!entry) {
-      console.error(`No definitions found for "${word}".`);
-      return null;
+      return {
+        word,
+        partOfSpeech: "",
+        definition: "",
+        pronunciations: [],
+        forms: [],
+        synonyms: [],
+        antonyms: [],
+        audioUrl: null,
+        usageExamples: [],
+        error: `No definitions found for "${word}".`
+      };
     }
 
-    return entry; // Return the full entry object
+    const lexeme = entry.lexemes?.[0];
+    const sense = lexeme?.senses?.[0];
+
+    /*
+    console.log("-------------DETAILED ENTRY LOG--------------", JSON.stringify(entry, null, 2));
+    console.log("-------------DETAILED LEXEME LOG--------------", JSON.stringify(lexeme, null, 2));
+    console.log("-------------DETAILED SENSE LOG--------------", JSON.stringify(sense, null, 2));
+    */
+
+    const foundWord = entry.entry || "N/A";
+    const foundPartOfSpeech = lexeme?.partOfSpeech || "N/A";
+    const foundDefinition = sense?.definition || "No definition provided.";
+    const foundAudio = entry.pronunciations?.[0]?.audio?.url || null;
+    const foundForms = lexeme?.forms?.map((f: any) => f.form) || [];
+    const foundPronunciations = entry.pronunciations?.map(
+      (p: any) => p.transcriptions?.[0]?.transcription || ""
+      ) || [];
+    const foundSynonyms = entry.lexemes
+      ?.flatMap((lexeme: any) =>
+      lexeme.synonymSets?.flatMap((set: any) => set.synonyms) || []
+      ) || [];
+    const foundAntonyms = entry.lexemes
+      ?.flatMap((lexeme: any) =>
+      lexeme.antonymSets?.flatMap((set: any) => set.antonyms) || []
+      ) || [];
+    const foundUsageExamples: string[] = lexeme?.senses?.flatMap((s: any) => s.usageExamples || []) || [];
+
+    return {
+      word: foundWord || "N/A",
+      partOfSpeech: foundPartOfSpeech || "N/A",
+      definition: foundDefinition || "No definition provided.",
+      pronunciations: foundPronunciations || [],
+      forms: foundForms || [],
+      synonyms: foundSynonyms || [],
+      antonyms: foundAntonyms || [],
+      audioUrl: foundAudio || null,
+      usageExamples: foundUsageExamples || [],
+      error: null,
+    };
   } catch (error) {
-    console.error("Unexpected error in getWordDetails:", error);
-    return null;
+    console.error(error);
+    return {
+      word,
+      partOfSpeech: "",
+      definition: "",
+      pronunciations: [],
+      forms: [],
+      synonyms: [],
+      antonyms: [],
+      audioUrl: null,
+      usageExamples: [],
+      error: "An unexpected error occurred."
+    };
   }
 }
