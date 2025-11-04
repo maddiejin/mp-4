@@ -3,6 +3,7 @@
 import { useFormState, useFormStatus } from "react-dom";
 import { getDefinition, DictionaryState } from "./actions";
 import { useRef, useEffect } from "react";
+import Link from "next/link";
 
 // show loading state on submit button
 function SubmitButton() {
@@ -102,6 +103,18 @@ export default function DictionaryPage() {
                 Your browser does not support the audio element.
               </audio>
             )}
+
+            <div className="mt-6 border-t border-gray-200 pt-4">
+              <Link
+                // @ts-ignore
+                href={`/word/${state.word}`}
+                className="group relative inline-block font-serif font-bold text-brand-green no-underline"
+              >
+                See all definitions & details &rarr;
+                {/* Underline effect */}
+                <span className="absolute bottom-0 left-0 block h-0.5 w-full scale-x-0 bg-brand-green transition-transform duration-300 group-hover:scale-x-100"></span>
+              </Link>
+            </div>
           </div>
         )}
       </div>
